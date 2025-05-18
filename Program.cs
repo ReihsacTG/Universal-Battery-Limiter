@@ -3,49 +3,42 @@ using System.Threading;
 
 class Program
 {
-    static int chargeLevel = 0;
-    static int chargeLimit = 80; // customizable max charge %
-
-    static void Main(string[] args)
+    static void Main()
     {
-        Console.WriteLine("Universal Battery Limiter");
-        Console.Write("Set max charge limit (default 80): ");
-        
-        string input = Console.ReadLine();
-        if (int.TryParse(input, out int limit) && limit > 0 && limit <= 100)
-        {
-            chargeLimit = limit;
-        }
-        
-        Console.WriteLine($"Charging will stop at {chargeLimit}% and resume below 40%.");
-        Console.WriteLine("Press Ctrl+C to exit.");
+        Console.WriteLine("Enter the max battery cap percentage (e.g., 80):");
+        int maxCap = int.Parse(Console.ReadLine());
+
+        int minCap = 40; // low threshold for recharging
+        int battery = minCap;
+        bool charging = true;
 
         while (true)
         {
-            SimulateBatteryCharge();
-            Thread.Sleep(1000); // wait 1 second per cycle
-        }
-    }
-
-    static void SimulateBatteryCharge()
-    {
-        // This simulates battery charging behavior:
-        if (chargeLevel >= chargeLimit)
-        {
-            Console.WriteLine($"Charge at {chargeLevel}%, stopping charge...");
-            // simulate unplugging charger (pause charge)
-            while (chargeLevel > 40)
+            if (charging)
             {
-                chargeLevel--; // battery discharging slowly
-                Console.WriteLine($"Discharging... Battery at {chargeLevel}%");
-                Thread.Sleep(1000);
+                battery++;
+                Console.WriteLine($"Charging... Battery at {battery}%");
+
+                if (battery >= maxCap)
+                {
+                    Console.WriteLine("Max battery reached. Stopping charge.");
+                    charging = false;
+                }
             }
-            Console.WriteLine("Charge below 40%, resuming charge...");
-        }
-        else
-        {
-            chargeLevel++;
-            Console.WriteLine($"Charging... Battery at {chargeLevel}%");
+            else
+            {
+                battery--;
+                Console.WriteLine($"Discharging... Battery at {battery}%");
+
+                if (battery <= minCap)
+                {
+                    Console.WriteLine("Battery low. Starting charge.");
+                    charging = true;
+                }
+            }
+
+            Thread.Sleep(1000); // wait 1 second
         }
     }
 }
+
